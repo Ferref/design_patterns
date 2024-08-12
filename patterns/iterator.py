@@ -1,46 +1,46 @@
-# Iterator interface
-class Iterator:
-    def has_next(self) -> bool:
-        raise NotImplementedError
+from abc import ABC, abstractmethod
+from collections.abc import Iterable, Iterator
 
-    def next(self):
-        raise NotImplementedError
-
-# Concrete Iterator class
-class ConcreteIterator(Iterator):
-    def __init__(self, collection):
-        self._collection = collection
-        self._index = 0
-
-    def has_next(self) -> bool:
-        return self._index < len(self._collection)
-
-    def next(self):
-        if self.has_next():
-            result = self._collection[self._index]
-            self._index += 1
-            return result
-        else:
-            raise StopIteration
-
-# Iterable Collection class
-class Collection:
+# Concrete collection class that implements the Iterable interface
+class BookCollection(Iterable):
     def __init__(self):
-        self._items = []
+        self._books = []  # Internal storage for books
 
-    def add_item(self, item):
-        self._items.append(item)
+    def add_book(self, book: str) -> None:
+        # Method to add a book to the collection
+        self._books.append(book)
 
     def __iter__(self) -> Iterator:
-        return ConcreteIterator(self._items)
+        # Return an instance of the iterator
+        return BookIterator(self)
 
-# Client code
-if __name__ == "__main__":
-    collection = Collection()
-    collection.add_item("Item1")
-    collection.add_item("Item2")
-    collection.add_item("Item3")
+    # Additional methods can be added here to manipulate the collection
 
-    iterator = iter(collection)
-    while iterator.has_next():
-        print(iterator.next())  # Output: Item1, Item2, Item3
+# Concrete iterator class that implements the Iterator interface
+class BookIterator(Iterator):
+    def __init__(self, collection: BookCollection):
+        self._collection = collection  # Collection to iterate through
+        self._index = 0  # Current index of the iterator
+
+    def __iter__(self) -> 'BookIterator':
+        return self  # Iterator itself is the iterator
+
+    def __next__(self) -> str:
+        if self._index < len(self._collection._books):
+            book = self._collection._books[self._index]  # Get the current book
+            self._index += 1  # Move to the next index
+            return book
+        else:
+            raise StopIteration  # Stop iteration if no more elements
+
+# Client code that uses the BookCollection and its iterator
+if __name__ == '__main__':
+    # Create a book collection
+    my_books = BookCollection()
+    my_books.add_book("The Catcher in the Rye")
+    my_books.add_book("To Kill a Mockingbird")
+    my_books.add_book("1984")
+    
+    # Use the iterator to print out the books in the collection
+    for book in my_books:
+        print(book)
